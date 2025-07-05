@@ -1,30 +1,30 @@
 #!/usr/bin/env python3
-"""Module for running multiple concurrent tasks."""
+""" Tasks """
 import asyncio
+import random
 from typing import List
-from .3_tasks import task_wait_random
 
 
-async def task_wait_n(n: int, max_delay: int) -> List[float]:
-    """Spawns task_wait_random n times with specified max_delay and returns sorted delays.
+task_wait_random = __import__('3-tasks').wait_random
 
-    Args:
-        n (int): Number of times to spawn task_wait_random.
-        max_delay (int): Maximum delay for each task_wait_random call.
 
-    Returns:
-        List[float]: List of delays in ascending order.
+async def task_wait_n(n: int = 0, max_delay: int = 10) -> List[float]:
     """
-    delays = []
-    tasks = [task_wait_random(max_delay) for _ in range(n)]
-    
-    # Gather results as they complete
-    for task in asyncio.as_completed(tasks):
+        Args:
+            max_delay: max wait
+            n: spawn function
+
+        Return:
+            multiples tasks
+    """
+    delays: List[float] = []
+    tasks: List[asyncio.Task] = []
+
+    for _ in range(n):
+        tasks.append(task_wait_random(max_delay))
+
+    for task in asyncio.as_completed((tasks)):
         delay = await task
-        # Insert delay in correct position to maintain ascending order
-        i = 0
-        while i < len(delays) and delays[i] < delay:
-            i += 1
-        delays.insert(i, delay)
-    
+        delays.append(delay)
+
     return delays
