@@ -1,25 +1,24 @@
 #!/usr/bin/env python3
-""" pagination"""
-
-from typing import Tuple, List
+""" Task 1: Simple pagination """
 import csv
 import math
+from typing import List
 
-
-index_range = __import__("0-simple_helper_function").index_range
+index_range = __import__('0-simple_helper_function').index_range
 
 
 class Server:
-    """Server class to paginate a database of popular baby names.
-    """
+    """Server class to paginate a database of popular baby names """
+
     DATA_FILE = "Popular_Baby_Names.csv"
 
     def __init__(self):
+        """ Initializes an instance of server class """
         self.__dataset = None
 
     def dataset(self) -> List[List]:
-        """Cached dataset
-        """
+        """ Cached dataset """
+
         if self.__dataset is None:
             with open(self.DATA_FILE) as f:
                 reader = csv.reader(f)
@@ -29,14 +28,22 @@ class Server:
         return self.__dataset
 
     def get_page(self, page: int = 1, page_size: int = 10) -> List[List]:
-        """ Return the elements with a pagination order """
-        assert type(page) == int and page > 0
-        assert type(page_size) == int and page_size > 0
+        """ Finds indexes to paginate and returns the corresponding pages """
+        assert type(page) is int and page > 0
+        assert type(page_size) is int and page_size > 0
 
-        start, end = index_range(page, page_size)
-        res_list = []
+        all_of_data = self.dataset()
+        Page_list = []
 
-        if start >= len(self.dataset()):
-            return res_list
-        res_list = self.dataset()
-        return res_list[start:end]
+        """ Check to see if # of entries is larger than dataset """
+        the_range = (page * page_size)
+        if the_range > len(all_of_data):
+            """ Return empty list if yes """
+            return Page_list
+
+        """ Between start and end idx create new page and append to list """
+        both_indexes = index_range(page, page_size)
+        for i in range(both_indexes[0], both_indexes[1]):
+            new_page = all_of_data[i]
+            Page_list.append(new_page)
+        return Page_list
