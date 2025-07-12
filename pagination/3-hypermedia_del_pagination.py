@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
-"""
-Deletion-resilient hypermedia pagination
-"""
+""" Deletion-resilient hypermedia pagination """
 
 import csv
 import math
-from typing import List, Dict
+from typing import List, Any, Dict, Tuple
+
+index_range = __import__('0-simple_helper_function').index_range
 
 
 class Server:
-    """Server class to paginate a database of popular baby names.
-    """
+    """ Server class to paginate a database of popular baby names """
     DATA_FILE = "Popular_Baby_Names.csv"
 
     def __init__(self):
@@ -18,8 +17,7 @@ class Server:
         self.__indexed_dataset = None
 
     def dataset(self) -> List[List]:
-        """Cached dataset
-        """
+        """ Cached dataset """
         if self.__dataset is None:
             with open(self.DATA_FILE) as f:
                 reader = csv.reader(f)
@@ -29,8 +27,7 @@ class Server:
         return self.__dataset
 
     def indexed_dataset(self) -> Dict[int, List]:
-        """Dataset indexed by sorting position, starting at 0
-        """
+        """ Dataset indexed by sorting position, starting at 0 """
         if self.__indexed_dataset is None:
             dataset = self.dataset()
             truncated_dataset = dataset[:1000]
@@ -40,23 +37,20 @@ class Server:
         return self.__indexed_dataset
 
     def get_hyper_index(self, index: int = None, page_size: int = 10) -> Dict:
-        """ return all data"""
-        assert type(index) == int and type(page_size) == int
-        assert 0 <= index < len(self.indexed_dataset())
-
-        data = []
-        next_index = index + page_size
-
-        for i in range(index, next_index):
-            if self.indexed_dataset().get(i):
-                data.append(self.indexed_dataset()[i])
+        """ Returns a dict with key/val pairs online """
+        h_idx: Dict = {}
+        data: List[Any] = []
+        count: int = index
+        assert index >= 0 and index <= len(self.__dataset)
+        h_idx["index"] = index
+        while len(data) < page_size:
+            page_req = self.__indexed_dataset.get(count)
+            if page_req:
+                data.append(page_req)
             else:
-                i += 1
-                next_index += 1
-
-        return {
-            'data': data,
-            'index': index,
-            'next_index': next_index,
-            'page_size': page_size
-        }
+                index += 1
+            count += 1
+        h_idx["data"] = data
+        h_idx["page_size"] = page_size
+        h_idx["next_index"] = index + page_size
+        return h_idx
