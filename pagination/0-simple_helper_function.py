@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
-""" pagination"""
-
-from typing import Tuple
+""" Task 0: Simple helper function """
 
 
-def index_range(page: int, page_size: int) -> Tuple[int, int]:
-    """ return the start of index and the end of index corresponding
-        to th rainge of indexes """
-    start = (page - 1) * page_size
-    end = start + page_size
-    return (start, end)
+def index_range(page: int, page_size: int) -> tuple:
+    """ return a tuple of size two containing a start and end index """
+    range = ()
+    if page == 1:
+        Start_index = 0
+        End_index = page * page_size
+        range = (Start_index, End_index)
+    else:
+        Start_index = (page - 1) * page_size
+        End_index = page * page_size
+        range = (Start_index, End_index)
+    return range
