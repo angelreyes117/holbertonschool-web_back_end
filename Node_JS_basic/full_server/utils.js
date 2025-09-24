@@ -1,46 +1,34 @@
-import fs from 'fs/promises';
+const fs = require('fs');
 
-/**
- * readDatabase(filePath)
- * - reads a CSV database file asynchronously
- * - returns a Promise that resolves to an object where keys are fields
- *   and values are arrays of firstnames in the order they appear
- * - rejects the promise with the error if file can't be read
- */
-export async function readDatabase(filePath) {
-  try {
-    const content = await fs.readFile(filePath, 'utf8');
-    const lines = content.split('\n').filter(Boolean);
-    if (lines.length === 0) return {};
+function readDatabase(path) {
+  return new Promise((resolve, reject) => {
+    fs.readFile(path, 'utf8', (err, data) => {
+      if (err) {
+        reject(Error(err));
+        return;
+      }
+      const content = data.toString().split('\n');
 
-    const headers = lines[0].split(',');
-    const idxFirstname = headers.indexOf('firstname');
-    const idxField = headers.indexOf('field');
+      let students = content.filter((item) => item);
 
-    if (idxFirstname === -1 || idxField === -1) {
-      // If headers are unexpected, return empty object
-      return {};
-    }
+      students = students.map((item) => item.split(','));
 
-    const result = {};
+      const fields = {};
+      for (const i in students) {
+        if (i !== 0) {
+          if (!fields[students[i][3]]) fields[students[i][3]] = [];
 
-    for (let i = 1; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (!line) continue;
-      const parts = line.split(',');
-      const firstname = parts[idxFirstname] ? parts[idxFirstname].trim() : '';
-      const field = parts[idxField] ? parts[idxField].trim() : '';
+          fields[students[i][3]].push(students[i][0]);
+        }
+      }
 
-      if (!firstname || !field) continue;
+      delete fields.field;
 
-      if (!result[field]) result[field] = [];
-      result[field].push(firstname);
-    }
+      resolve(fields);
 
-    return result;
-  } catch (err) {
-    // propagate the error so callers can reject accordingly
-    throw err;
-  }
+      //   return fields;
+    });
+  });
 }
-export default { readDatabase };
+
+export default readDatabase;

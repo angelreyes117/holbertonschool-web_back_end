@@ -1,17 +1,13 @@
 import express from 'express';
-import routes from './routes/index.js';
+import controllerRouting from './routes/index';
 
 const app = express();
+const port = 1245;
 
-app.use('/', routes);
+controllerRouting(app);
 
-const PORT = 1245;
-
-if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
-    // eslint-disable-next-line no-console
-    console.log(`Server is listening on port ${PORT}`);
-  });
-}
+app.listen(port, () => {
+  //   console.log(`Example app listening at http://localhost:${port}`);
+});
 
 export default app;
